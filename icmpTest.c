@@ -62,7 +62,7 @@ void ProcessPacket(unsigned char* buffer, int size)
 	{
 		case 1:  //ICMP Protocol
 			++icmp;
-			PrintIcmpPacket(Buffer,Size);
+			print_icmp_packet(Buffer,Size);
 			break;
 		
 		
