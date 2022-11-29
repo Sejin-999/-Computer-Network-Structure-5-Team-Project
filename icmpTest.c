@@ -89,7 +89,7 @@ void ProcessPacket(unsigned char* buffer, int size)
 			++others;
 			break;
 	}
-	printf("TCP : %d ICMP : %d  Others : %d   Total : %d\r",tcp,icmp,others,total+1);  //최초 값받을떄 udp값 하나가 들어옴... total+1
+	printf("TCP : %d ICMP : %d  Others : %d   Total : %d\r",tcp,icmp,others,total-1);  //최초 값받을떄 udp값 하나가 들어옴... total-1
 }
 
 void print_ip_header(unsigned char* Buffer, int Size)
