@@ -1,55 +1,69 @@
-#include<stdio.h>	//For standard things
+#include<stdio.h>
 #include<stdlib.h>	//malloc
 #include<string.h>	//memset
-#include<netinet/ip_icmp.h>	//Provides declarations for icmp header
-#include<netinet/tcp.h>	//Provides declarations for tcp header
-#include<sys/socket.h>
-#include<arpa/inet.h>
-#include<fcntl.h> //open
-#include<unistd.h> // close
+#include<netinet/ip_icmp.h>	//icmp header
+#include<netinet/tcp.h>		//tcp header
+#include<sys/socket.h>		//sock 생성
+#include<arpa/inet.h> 		//
+#include<fcntl.h> 		//open 함수
+#include<unistd.h> 		// close 함수
+
+//선언 Start
 void ProcessPacket(unsigned char* , int);
 void print_tcp_packet(unsigned char* , int);
 void print_icmp_packet(unsigned char* , int);
 void PrintData (unsigned char* , int);
 
-int sock_raw_ICMP;
-FILE *logfile;
-int tcp=0,icmp=0,others=0,total=0,i,j;
-struct sockaddr_in source,dest;
+//선언 End
+
+// 초기값 설정 Start
+
+int sock_raw_ICMP , sock_raw_TCP;   //icmp , tcp 용 raw 소캣 선언
+FILE *logfile; //로그파일 생성 
+int tcp=0,icmp=0,others=0,total=0,i,j; //초기화
+struct sockaddr_in source,dest; //구조체 선언
+
+// 초기값 설정 End
 
 int main()
 {
-	int saddr_size , data_size;
+	int saddr_size , data_size , data_size_icmp;
 	struct sockaddr saddr;
 	struct in_addr in;
 	
-	unsigned char *buffer = (unsigned char *)malloc(65536); //Its Big!
+	unsigned char *buffer = (unsigned char *)malloc(65536); //malloc 메모리 생성 
 	
-	logfile=fopen("log.txt","w");
+	logfile=fopen("log.txt","w"); //로그파일오픈 ...
 	if(logfile==NULL) printf("Unable to create file.");
-	printf("Starting...\n");
-	//Create a raw socket that shall sniff
-	sock_raw_ICMP = socket(AF_INET , SOCK_RAW , IPPROTO_TCP); //icmp socket create
-	if(sock_raw_ICMP < 0)
+	printf("캡처 프로그램 시작...\n");
+	//raw 소캣 생성.. 소캣 선언용
+	sock_raw_ICMP = socket(AF_INET , SOCK_RAW , IPPROTO_ICMP); //icmp socket 생성
+	sock_raw_TCP = socket(AF_INET , SOCK_RAW , IPPROTO_TCP); //TCP socket 생성
+	
+	if((sock_raw_ICMP < 0)  &&(sock_raw_TCP < 0))   //소캣 값 선언 오류시 체크
 	{
-		printf("Socket Error\n");
+		printf("소캣 에러 ... 종료합니다\n");
 		return 1;
 	}
 	while(1)
 	{
 		saddr_size = sizeof saddr;
-		//Receive a packet
-		data_size = recvfrom(sock_raw_ICMP, buffer , 65536 , 0 , &saddr , &saddr_size);
-		if(data_size <0 )
+		//소캣받기 Start
+		data_size = recvfrom(sock_raw_TCP, buffer , 65536 , 0 , &saddr , &saddr_size);  //tcp 소캣 
+		data_size_icmp = recvfrom(sock_raw_ICMP, buffer , 65536 , 0 , &saddr , &saddr_size);
+		//소캣받기 End
+		if((data_size <0) && (data_size_icmp < 0) )  // 소캣 recv 오류 
 		{
-			printf("Recvfrom error , failed to get packets\n");
+			printf("recv 오류 확인\n");
 			return 1;
 		}
 		//Now process the packet
 		ProcessPacket(buffer , data_size);
+		ProcessPacket(buffer , data_size_icmp);
 	}
+	close(sock_raw_TCP);
 	close(sock_raw_ICMP);
-	printf("Finished");
+	printf("TCP, ICMP 소캣 종료 확인...\n);
 	return 0;
 }
 
@@ -75,7 +89,7 @@ void ProcessPacket(unsigned char* buffer, int size)
 			++others;
 			break;
 	}
-	printf("TCP : %d ICMP : %d  Others : %d   Total : %d\r",tcp,icmp,others,total);
+	printf("TCP : %d ICMP : %d  Others : %d   Total : %d\r",tcp,icmp,others,total+1);  //최초 값받을떄 udp값 하나가 들어옴... total+1
 }
 
 void print_ip_header(unsigned char* Buffer, int Size)
