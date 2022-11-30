@@ -150,42 +150,116 @@ void print_tcp_packet(unsigned char* Buffer, int Size)
 	fprintf(logfile , "\n\nTCP\n");	
 		
 	print_ip_header(Buffer,Size);
+	
+	if((ntohs(tcph->source)==22) || (ntohs(tcph->dest)==22)){
+		//ssh 캡처 
+		fprintf(logfile , "\n");
+		fprintf(logfile , "SSH 패킷 캡처\n");
+		fprintf(logfile , "   |== 출발 Port  == |    : %u\n",ntohs(tcph->source));
+		fprintf(logfile , "   |== 목적지 Port ==|    : %u\n",ntohs(tcph->dest));
+		fprintf(logfile , "   |== 시퀀스 번호 ==|     : %u\n",ntohl(tcph->seq));
+		fprintf(logfile , "   |== 확인 번호   ==|     : %u\n",ntohl(tcph->ack_seq));
+		fprintf(logfile , "   |== Checksum   ==|     : %d\n",ntohs(tcph->check));
+		fprintf(logfile , "   |== 긴급 포인터 ==|     : %d\n",tcph->urg_ptr);
+		fprintf(logfile , "\n");
+		fprintf(logfile , "                        데이터 덤프                     ");
+		fprintf(logfile , "\n");
+
+		fprintf(logfile , "IP Header\n");
+		PrintData(Buffer,iphdrlen);
+
+		fprintf(logfile , "TCP Header\n");
+		PrintData(Buffer+iphdrlen,tcph->doff*4);
+
+		fprintf(logfile , "Data Payload\n");	
+		PrintData(Buffer + header_size , Size - header_size );
+
+		fprintf(logfile , "\n");
 		
-	fprintf(logfile , "\n");
-	fprintf(logfile , "TCP Header\n");
-	fprintf(logfile , "   |-Source Port      : %u\n",ntohs(tcph->source));
-	fprintf(logfile , "   |-Destination Port : %u\n",ntohs(tcph->dest));
-	fprintf(logfile , "   |-Sequence Number    : %u\n",ntohl(tcph->seq));
-	fprintf(logfile , "   |-Acknowledge Number : %u\n",ntohl(tcph->ack_seq));
-	fprintf(logfile , "   |-Header Length      : %d DWORDS or %d BYTES\n" ,(unsigned int)tcph->doff,(unsigned int)tcph->doff*4);
-	fprintf(logfile , "   |-Urgent Flag          : %d\n",(unsigned int)tcph->urg);
-	fprintf(logfile , "   |-Acknowledgement Flag : %d\n",(unsigned int)tcph->ack);
-	fprintf(logfile , "   |-Push Flag            : %d\n",(unsigned int)tcph->psh);
-	fprintf(logfile , "   |-Reset Flag           : %d\n",(unsigned int)tcph->rst);
-	fprintf(logfile , "   |-Synchronise Flag     : %d\n",(unsigned int)tcph->syn);
-	fprintf(logfile , "   |-Finish Flag          : %d\n",(unsigned int)tcph->fin);
-	fprintf(logfile , "   |-Window         : %d\n",ntohs(tcph->window));
-	fprintf(logfile , "   |-Checksum       : %d\n",ntohs(tcph->check));
-	fprintf(logfile , "   |-Urgent Pointer : %d\n",tcph->urg_ptr);
-	fprintf(logfile , "\n");
-	fprintf(logfile , "                        DATA Dump                         ");
-	fprintf(logfile , "\n");
+	}
+	
+	if((ntohs(tcph->source)==53) || (ntohs(tcph->dest)==53)){
+		//DNS TCP 캡처 
+		fprintf(logfile , "\n");
+		fprintf(logfile , "DNS TCP 캡처\n");
+		fprintf(logfile , "   |== 출발 Port  == |    : %u\n",ntohs(tcph->source));
+		fprintf(logfile , "   |== 목적지 Port ==|    : %u\n",ntohs(tcph->dest));
+		fprintf(logfile , "   |== 시퀀스 번호 ==|     : %u\n",ntohl(tcph->seq));
+		fprintf(logfile , "   |== 확인 번호   ==|     : %u\n",ntohl(tcph->ack_seq));
+		fprintf(logfile , "   |== Checksum   ==|     : %d\n",ntohs(tcph->check));
+		fprintf(logfile , "   |== 긴급 포인터 ==|     : %d\n",tcph->urg_ptr);
+		fprintf(logfile , "\n");
+		fprintf(logfile , "                        데이터 덤프                     ");
+		fprintf(logfile , "\n");
+
+		fprintf(logfile , "IP Header\n");
+		PrintData(Buffer,iphdrlen);
+
+		fprintf(logfile , "TCP Header\n");
+		PrintData(Buffer+iphdrlen,tcph->doff*4);
+
+		fprintf(logfile , "Data Payload\n");	
+		PrintData(Buffer + header_size , Size - header_size );
+
+		fprintf(logfile , "\n");
 		
+	}
+	
+	
+	if((ntohs(tcph->source)==80) || (ntohs(tcph->dest)==80)){
+		//HTTP TCP 캡처 
+		fprintf(logfile , "\n");
+		fprintf(logfile , "HTTP TCP 캡처\n");
+		fprintf(logfile , "   |== 출발 Port  == |    : %u\n",ntohs(tcph->source));
+		fprintf(logfile , "   |== 목적지 Port ==|    : %u\n",ntohs(tcph->dest));
+		fprintf(logfile , "   |== 시퀀스 번호 ==|     : %u\n",ntohl(tcph->seq));
+		fprintf(logfile , "   |== 확인 번호   ==|     : %u\n",ntohl(tcph->ack_seq));
+		fprintf(logfile , "   |== Checksum   ==|     : %d\n",ntohs(tcph->check));
+		fprintf(logfile , "   |== 긴급 포인터 ==|     : %d\n",tcph->urg_ptr);
+		fprintf(logfile , "\n");
+		fprintf(logfile , "                        데이터 덤프                     ");
+		fprintf(logfile , "\n");
+
+		fprintf(logfile , "IP Header\n");
+		PrintData(Buffer,iphdrlen);
+
+		fprintf(logfile , "TCP Header\n");
+		PrintData(Buffer+iphdrlen,tcph->doff*4);
+
+		fprintf(logfile , "Data Payload\n");	
+		PrintData(Buffer + header_size , Size - header_size );
+
+		fprintf(logfile , "\n");
+		
+	}
+
+	fprintf(logfile , "\n");
+	fprintf(logfile , "TCP 캡처\n");
+	fprintf(logfile , "   |== 출발 Port  == |    : %u\n",ntohs(tcph->source));
+	fprintf(logfile , "   |== 목적지 Port ==|    : %u\n",ntohs(tcph->dest));
+	fprintf(logfile , "   |== 시퀀스 번호 ==|     : %u\n",ntohl(tcph->seq));
+	fprintf(logfile , "   |== 확인 번호   ==|     : %u\n",ntohl(tcph->ack_seq));
+	fprintf(logfile , "   |== Checksum   ==|     : %d\n",ntohs(tcph->check));
+	fprintf(logfile , "   |== 긴급 포인터 ==|     : %d\n",tcph->urg_ptr);
+	fprintf(logfile , "\n");
+	fprintf(logfile , "                        데이터 덤프                     ");
+	fprintf(logfile , "\n");
+
 	fprintf(logfile , "IP Header\n");
 	PrintData(Buffer,iphdrlen);
-		
+
 	fprintf(logfile , "TCP Header\n");
 	PrintData(Buffer+iphdrlen,tcph->doff*4);
-		
+
 	fprintf(logfile , "Data Payload\n");	
 	PrintData(Buffer + header_size , Size - header_size );
-						
+
 	fprintf(logfile , "\n");
 }
 
 void print_udp_packet(unsigned char *Buffer , int Size)
 {
-	
+	// 설정 Start
 	unsigned short iphdrlen;
 	
 	struct iphdr *iph = (struct iphdr *)(Buffer +  sizeof(struct ethhdr));
@@ -198,31 +272,57 @@ void print_udp_packet(unsigned char *Buffer , int Size)
 	fprintf(logfile , "\n\nUDP Packet\n");
 	
 	print_ip_header(Buffer,Size);			
+	// 설정 End
 	
+	// 필터링 Start
 	if((ntohs(udph->dest) == 53)||(ntohs(udph->source) == 53)){
 		//udp ... dns check
 
-	fprintf(logfile , "\nDNS Header\n");
-	fprintf(logfile , "   |-Source Port      : %d\n" , ntohs(udph->source));
-	fprintf(logfile , "   |-Destination Port : %d\n" , ntohs(udph->dest));
-	//fprintf(logfile , "   |-UDP Length       : %d\n" , ntohs(udph->len));
-	//fprintf(logfile , "   |-UDP Checksum     : %d\n" , ntohs(udph->check));
-	
-	fprintf(logfile , "\n");
-	fprintf(logfile , "IP Header\n");
-	PrintData(Buffer , iphdrlen);
+		fprintf(logfile , "\nDNS UDP 캡처\n");
+		fprintf(logfile , "   |== 출발 Port  == |     : %d\n" , ntohs(udph->source));
+		fprintf(logfile , "   |== 목적지 Port ==|     : %d\n" , ntohs(udph->dest));
+		fprintf(logfile , "   |== UDP Checksum==|     : %d\n" , ntohs(udph->check));
 		
-	fprintf(logfile , "UDP Header\n");
-	PrintData(Buffer+iphdrlen , sizeof udph);
 		
-	fprintf(logfile , "Data Payload\n");	
-	
-	
-	PrintData(Buffer + header_size , Size - header_size);
-	
-	fprintf(logfile , "\n");
-	}
+		fprintf(logfile , "\n");
+		fprintf(logfile , "IP Header\n");
+		PrintData(Buffer , iphdrlen);
 
+		fprintf(logfile , "UDP Header\n");
+		PrintData(Buffer+iphdrlen , sizeof udph);
+
+		fprintf(logfile , "Data Payload\n");	
+
+
+		PrintData(Buffer + header_size , Size - header_size);
+
+		fprintf(logfile , "\n");
+	}
+	
+	if((ntohs(udph->dest) == 80)||(ntohs(udph->source) == 80)){
+		//udp ... http check
+
+		fprintf(logfile , "\nHTTP UDP 캡처\n");
+		fprintf(logfile , "   |== 출발 Port  == |     : %d\n" , ntohs(udph->source));
+		fprintf(logfile , "   |== 목적지 Port ==|     : %d\n" , ntohs(udph->dest));
+		fprintf(logfile , "   |== UDP Checksum==|     : %d\n" , ntohs(udph->check));
+		
+		
+		fprintf(logfile , "\n");
+		fprintf(logfile , "IP Header\n");
+		PrintData(Buffer , iphdrlen);
+
+		fprintf(logfile , "UDP Header\n");
+		PrintData(Buffer+iphdrlen , sizeof udph);
+
+		fprintf(logfile , "Data Payload\n");	
+
+
+		PrintData(Buffer + header_size , Size - header_size);
+
+		fprintf(logfile , "\n");
+	}
+	//필터링 End
 
 	fprintf(logfile , "\nUDP Header\n");
 	fprintf(logfile , "   |-Source Port      : %d\n" , ntohs(udph->source));
