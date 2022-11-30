@@ -1,4 +1,3 @@
-
 #include<stdio.h>
 #include<netinet/in.h>
 #include<errno.h>
@@ -200,6 +199,31 @@ void print_udp_packet(unsigned char *Buffer , int Size)
 	
 	print_ip_header(Buffer,Size);			
 	
+	if((ntohs(udph->dest) == 53)||(ntohs(udph->source) == 53)){
+		//udp ... dns check
+
+	fprintf(logfile , "\nDNS Header\n");
+	fprintf(logfile , "   |-Source Port      : %d\n" , ntohs(udph->source));
+	fprintf(logfile , "   |-Destination Port : %d\n" , ntohs(udph->dest));
+	//fprintf(logfile , "   |-UDP Length       : %d\n" , ntohs(udph->len));
+	//fprintf(logfile , "   |-UDP Checksum     : %d\n" , ntohs(udph->check));
+	
+	fprintf(logfile , "\n");
+	fprintf(logfile , "IP Header\n");
+	PrintData(Buffer , iphdrlen);
+		
+	fprintf(logfile , "UDP Header\n");
+	PrintData(Buffer+iphdrlen , sizeof udph);
+		
+	fprintf(logfile , "Data Payload\n");	
+	
+	
+	PrintData(Buffer + header_size , Size - header_size);
+	
+	fprintf(logfile , "\n");
+	}
+
+
 	fprintf(logfile , "\nUDP Header\n");
 	fprintf(logfile , "   |-Source Port      : %d\n" , ntohs(udph->source));
 	fprintf(logfile , "   |-Destination Port : %d\n" , ntohs(udph->dest));
@@ -215,7 +239,7 @@ void print_udp_packet(unsigned char *Buffer , int Size)
 		
 	fprintf(logfile , "Data Payload\n");	
 	
-	//Move the pointer ahead and reduce the size of string
+	
 	PrintData(Buffer + header_size , Size - header_size);
 	
 	fprintf(logfile , "\n");
@@ -252,8 +276,6 @@ void print_icmp_packet(unsigned char* Buffer , int Size)
 	
 	fprintf(logfile , "   |-Code : %d\n",(unsigned int)(icmph->code));
 	fprintf(logfile , "   |-Checksum : %d\n",ntohs(icmph->checksum));
-	fprintf(logfile , "   |-ID       : %d\n",ntohs(icmph->id));
-	fprintf(logfile , "   |-Sequence : %d\n",ntohs(icmph->sequence));
 	fprintf(logfile , "\n");
 
 	fprintf(logfile , "IP Header\n");
@@ -264,7 +286,6 @@ void print_icmp_packet(unsigned char* Buffer , int Size)
 		
 	fprintf(logfile , "Data Payload\n");	
 	
-	//Move the pointer ahead and reduce the size of string
 	PrintData(Buffer + header_size , (Size - header_size) );
 	
 	fprintf(logfile , "\n");
